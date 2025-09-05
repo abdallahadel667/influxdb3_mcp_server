@@ -75,3 +75,4 @@ jspm_packages/
 .vscode-test/
 tmp/
 temp/
+.env
