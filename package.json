@@ -15,6 +15,10 @@
     "dev": "ts-node --watch src/index.ts",
     "build": "tsc",
     "start:prod": "node dist/index.js"
+    "start": "ts-node src/index.ts",
+    "dev": "ts-node --watch src/index.ts",
+    "build": "tsc",
+    "start:prod": "node dist/index.js"
     "start": "node build/index.js",
     "dev": "tsc && node build/index.js",
     "clean": "rm -rf build",

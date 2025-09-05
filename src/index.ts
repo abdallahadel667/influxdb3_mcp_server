@@ -1,38 +1,41 @@
 #!/usr/bin/env node
 
-/**
- * Standalone InfluxDB MCP Server
- *
- * Main entry point for the MCP server that provides InfluxDB integration
- * for Claude Desktop and other MCP clients.
- */
-
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { createServer } from "./server/index.js";
+import { validateConfig } from './config/index.js';
+import { CLIInterface } from './cli/interface.js';
 
 async function main() {
   try {
-    const server = createServer();
-    const transport = new StdioServerTransport();
-    await server.connect(transport);
-    console.error("[MCP] InfluxDB MCP Server started successfully");
+    // Validate configuration
+    validateConfig();
+    
+    // Start the CLI interface
+    const cli = new CLIInterface();
+    await cli.start();
   } catch (error) {
-    console.error("[MCP] Failed to start server:", error);
+    console.error('❌ Failed to start InfluxDB Agent:', error);
+    
+    if (error instanceof Error && error.message.includes('GOOGLE_API_KEY')) {
+      console.log('\n💡 Setup Instructions:');
+      console.log('1. Get a Google AI API key from: https://makersuite.google.com/app/apikey');
+      console.log('2. Copy .env.example to .env');
+      console.log('3. Add your API key and InfluxDB configuration to .env');
+      console.log('4. Make sure your InfluxDB MCP server is properly configured');
+    }
+    
     process.exit(1);
   }
 }
 
-process.on("SIGINT", async () => {
-  console.error("[MCP] Shutting down...");
-  process.exit(0);
-});
-
-process.on("SIGTERM", async () => {
-  console.error("[MCP] Shutting down...");
-  process.exit(0);
-});
-
-main().catch((error) => {
-  console.error("[MCP] Server error:", error);
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
 });
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+main();
